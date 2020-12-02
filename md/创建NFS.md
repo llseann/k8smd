@@ -5,7 +5,7 @@
 ```shell
 [root@nfs ~]# yum install nfs-u*				#安装NFS相关
 [root@nfs ~]# systemctl start nfs				#启动
-[root@nfs ~]# systemctl enable nfs				#开机自弃
+[root@nfs ~]# systemctl enable nfs				#开机自启
 Created symlink from /etc/systemd/system/multi-user.target.wantsice.
 [root@nfs ~]# mkdir share						#创建被共享的目录
 [root@nfs ~]# cd share/
