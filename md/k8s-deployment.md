@@ -195,3 +195,36 @@ REVISION  CHANGE-CAUSE
 ```
 
 `kubectl rollout undo deployment/nginx --to-revision=6`：使得deployment回退到指定版本6上
+
+## 4、HPA水平自动伸缩 
+
+概念：通过检测pod CPU的负载， 解决deployment里某pod负载太重， 动态伸缩pod的数量来负载均衡 
+
+![1606925880872](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1606925880872.png)
+
+使用：
+
+```
+[root@master ~]# kubectl autoscale deployment nginx --min=2 --max=10 --cpu-percent=80
+horizontalpodautoscaler.autoscaling/nginx autoscaled
+参数解析：
+--min=2 ：最少的副本数为2
+--max=10 ：最多的副本数为10
+--cpu-percent=80 ：cpu使用占比超过80%会发生扩容行为
+```
+
+但是实际使用中会出现一个问题，如下:
+
+```
+[root@master ~]# kubectl get hpa
+NAME      REFERENCE          TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+nginx     Deployment/nginx   <unknown>/80%   2         10        0          15s
+```
+
+cpu占用会显示为`<unknown>`暂未解决，后续再进行讨论
+
+进去某个pod ，执行`cat /dev/zero > /dev/null & `
+
+观察pod的数目变化，及hpa的cpu使用量 
+
+在物理机里killall -9 cat ，查看pod数量
