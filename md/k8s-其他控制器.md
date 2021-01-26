@@ -163,7 +163,7 @@ ds-test-lxb27   1/1       Running   0          41s       10.244.0.31   master
 
 ### 4、部署一次性任务和定时任务
 
-一次性任务：
+**一次性任务Job：**
 
 适用场景：任务只需要被调度一次，如某些初始化场景
 
@@ -200,7 +200,30 @@ NAME      DESIRED   SUCCESSFUL   AGE
 pi        1         1            1m
 ```
 
-定时任务：
+`restartPolicy`失败策略，只有Nerver和OnFailure状态
+
+`Never`表示只要任务没有完成，则创建pod，直到job完成，该策略会导致产生多个pod
+
+`OnFailure`表示只要pod没有完成，会重启该pod，直到job被完成
+
+策略：
+
+```
+spec:
+  backoffLimit: 6		#失败pod的极限
+  completions: 1		#有一个pod运行成功
+  parallelism: 1	  	#一次性运行pod的个数
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4
+```
+
+**定时任务Cronjob：**
 
 适用场景，需要定期导数据或者定期截取日志
 
@@ -239,3 +262,9 @@ hello-1608913860-mdccj   0/1       ContainerCreating   0          4s
 效果为会在每分钟进行一次运行，具体控制为cron表达式
 
 删除cronjob后。对应的pod也会被清除
+
+有的版本会需要手动启用cronjob
+`vim /etc/kubernetes/manifests/kube-apiserver.yaml`
+添加`--runtime-config=batch/v2alpha1=true`
+
+重启`systemctl restart kubelet.service`
