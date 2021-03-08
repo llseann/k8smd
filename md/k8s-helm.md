@@ -199,7 +199,6 @@ scp -r test/* 192.168.10.250:/data/charts/
 ```
 #创建名为mychart的chart模板
 helm create mychart
-
 [root@master ~]# tree mychart/
 mychart/
 ├── charts
@@ -211,6 +210,69 @@ mychart/
 │   ├── NOTES.txt
 │   └── service.yaml
 └── values.yaml
+#删除掉原来templates下的所有文件
+#添加上简单的ng的deploment和对应svcyaml
+#修改动态参数
+```
+
+```
+#nginx-np.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: {{ .Values.lab }}
+  name: {{ .Values.npname }}
+spec:
+  ports:
+  - name: {{ .Values.npname }}
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: {{ .Values.lab }}
+  type: NodePort
+  
+  
+#nginx.yaml
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.rep }}
+  selector:
+    matchLabels:
+      run: {{ .Values.lab }}
+  template:
+    metadata:
+      labels:
+        run: {{ .Values.lab  }}
+    spec:
+      containers:
+      - image: {{ .Values.name }}:{{ .Values.tag }}
+        name: {{ .Values.lab }}-{{ .Values.rep }}
+        
+#values
+npname: nginxnp
+
+name: docker.io/nginx
+tag: 1.9
+
+rep: 1
+lab: nginx
+# helm install --name=nginx321 mychart/ --dry-run		测试安装
+helm install --name=nginx123 mychart/
+
+
+#修改chart后使用upgrade进行升级即可
+helm upgrade nginx123 mychart/				
+```
+
+
+
+```
+#制作成tar包传到私库
 [root@master ~]# helm package mychart/
 [root@master ~]# mkdir mychart
 [root@master ~]# mv mychart-0.1.0.tgz mychart
@@ -221,6 +283,5 @@ mychart/
 NAME          	CHART VERSION	APP VERSION	DESCRIPTION                
 local/mychart 	0.1.0        	1.0        	A Helm chart for Kubernetes
 myrepo/mychart	0.1.0        	1.0        	A Helm chart for Kubernetes
-
 ```
 
