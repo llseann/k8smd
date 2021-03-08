@@ -284,4 +284,4 @@ NAME          	CHART VERSION	APP VERSION	DESCRIPTION
 local/mychart 	0.1.0        	1.0        	A Helm chart for Kubernetes
 myrepo/mychart	0.1.0        	1.0        	A Helm chart for Kubernetes
 ```
-
+.
